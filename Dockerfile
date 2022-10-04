@@ -1,18 +1,17 @@
-# Using lightweight alpine image
-FROM python:3.8-alpine
+# It must use alpine3.12; otherwise, it won't work in Raspberry Pi 32bit.
+FROM python:3-alpine3.12
 
-# Installing packages
-RUN apk update
-RUN pip install --no-cache-dir pipenv
+WORKDIR /app
 
-# Defining working directory and adding source code
-WORKDIR /usr/src/app
-COPY Pipfile Pipfile.lock bootstrap.sh ./
-COPY cashman ./cashman
+COPY requirements.txt requirements.txt
 
-# Install API dependencies
-RUN pipenv install --system --deploy
+RUN pip install -r requirements.txt
 
-# Start app
-EXPOSE 5000
-ENTRYPOINT ["/usr/src/app/bootstrap.sh"]
+COPY . .
+
+ENV FLASK_APP=main.py
+ENV FLASK_ENV=production
+
+CMD [ "python", "main.py"]
+
+EXPOSE 8080
